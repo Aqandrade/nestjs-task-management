@@ -46,4 +46,15 @@ export class TasksService {
 
     return this.tasks.find((task) => task.id === id);
   }
+
+  updateStatus(id: string, status: string): Task {
+    this.tasks = this.tasks.map((task) => {
+      if (task.id === id) {
+        task.status = TaskStatus[status];
+      }
+      return task;
+    });
+
+    return this.tasks.find((task) => task.id === id);
+  }
 }
