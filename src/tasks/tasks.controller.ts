@@ -8,12 +8,14 @@ import {
   Put,
   Patch,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { Task } from './task.model';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -35,12 +37,19 @@ export class TasksController {
 
   @Get('/:id')
   getTaskById(@Param('id') id: string): Task {
-    return this.tasksService.getTaskById(id);
+    const found = this.tasksService.getTaskById(id);
+
+    if (!found) {
+      throw new NotFoundException(`Task with id "${id}" not found`);
+    }
+
+    return found;
   }
 
   @Delete('/:id')
   deleteTaskById(@Param('id') id: string): void {
-    return this.tasksService.deleteTaskById(id);
+    const found = this.getTaskById(id);
+    return this.tasksService.deleteTaskById(found.id);
   }
 
   @Put('/:id')
@@ -52,7 +61,11 @@ export class TasksController {
   }
 
   @Patch('/:id/status')
-  updateStatus(@Param('id') id: string, @Body('status') status: string): Task {
+  updateStatus(
+    @Param('id') id: string,
+    @Body() updateTaskStatusDto: UpdateTaskStatusDto,
+  ): Task {
+    const { status } = updateTaskStatusDto;
     return this.tasksService.updateStatus(id, status);
   }
 }
