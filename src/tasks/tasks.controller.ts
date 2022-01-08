@@ -8,6 +8,7 @@ import {
   Put,
   Patch,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -22,6 +23,8 @@ import { User } from 'src/auth/user.entity';
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
+  private logger = Logger;
+
   constructor(private tasksService: TasksService) {}
 
   @Get()
@@ -29,6 +32,11 @@ export class TasksController {
     @Body() tasksFilterDto: GetTasksFilterDto,
     @GetUser() user: User,
   ): Promise<Task[]> {
+    this.logger.verbose(`
+      User "${user.username}" geting all tasks. Filter: "${JSON.stringify(
+      tasksFilterDto,
+    )}"
+    `);
     return this.tasksService.getTasks(tasksFilterDto, user);
   }
 
@@ -42,6 +50,11 @@ export class TasksController {
     @Body() createTaskDto: CreateTaskDto,
     @GetUser() user: User,
   ): Promise<Task> {
+    this.logger.verbose(`
+      user "${user.username}" creating a task. Data: "${JSON.stringify(
+      createTaskDto,
+    )}"
+    `);
     const task = this.tasksService.createTask(createTaskDto, user);
     return task;
   }
